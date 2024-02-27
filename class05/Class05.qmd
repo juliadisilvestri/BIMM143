@@ -1,0 +1,118 @@
+---
+title: "Class05: Data Vis with ggplot"
+author: "Julia (PID: A16950824)"
+format: pdf
+editor: visual
+---
+
+# Graphics systems in R
+
+There are many graphics systems in R for making plots and figures.
+
+We have already played a little bit with **"base R"** graphics and the `plot()` function.
+
+Today we will start learning about a popular graphics package called `ggplot2()`
+
+This is an add package -- i.e. we need to install it. I install it (like I install any package) with the `install.packages()` function.
+
+```{r}
+plot(cars)
+```
+
+Before I can use the functions from a package I have to look up the package from my "library". We use the `library(ggplot2)` command to load it up.
+
+```{r}
+#install.packages(ggplot2)
+library("ggplot2")
+ggplot(cars)
+```
+
+Every ggplot is made up of at least 3 things:
+- data (the numbers etc. that will go into your plot)
+- aes (how the columns of data map to the plot aesthetics)
+- geoms (how the plot actually looks, points, bars, lines, ect.)
+
+```{r}
+ggplot(cars) + aes(x=speed, y=dist) + geom_point()
+```
+
+For simple plots ggplot is more verbose - it takes more code - than base R plot.
+
+
+Add some more layers to our ggplot:
+
+```{r}
+ggplot(cars) + aes(x=speed, y=dist) + geom_point() + geom_smooth(se=F) + labs(title="Stopping Distance of Old Cars", subtitle = "A Silly Example Plot") + theme_bw()
+```
+Calling up **Gene Data Set** from class hand-out
+
+```{r}
+url <- "https://bioboot.github.io/bimm143_S20/class-material/up_down_expression.txt"
+genes <- read.delim(url)
+head(genes)
+```
+
+Getting information from data set
+
+```{r}
+nrow(genes)
+ncol(genes)
+colnames(genes)
+num_upreg<-sum(genes$State == "up")
+num_upreg
+(num_upreg) / (nrow(genes)) * 100
+```
+
+Making a simple plot of "Genes"
+
+```{r}
+ggplot(genes) + aes(x=Condition1, y=Condition2) + geom_point()
+```
+
+Adding some complexities to the plot
+
+```{r}
+gene_plot<-ggplot(genes) + aes(x=Condition1, y=Condition2, col=State) + geom_point()
+gene_plot + scale_colour_manual( values=c("purple", "gray", "green") )
+```
+
+Adding Labels to graph
+
+```{r}
+gene_plot + labs(title="Gene Expression Changes Upon Drug Treatment", x="Control (no drug)", y="Drug Treatment") + scale_colour_manual( values=c("purple", "gray", "green") )
+```
+Installed `gapminder` and `dplyr` packages
+
+```{r}
+# install.packages(gapminder)
+# install.packages(dplyr)
+library(gapminder)
+library(dplyr)
+```
+
+Loading in **Gapminder Data Set** 
+
+```{r}
+gapminder_2007 <- gapminder %>% filter(year==2007)
+gapminder_2007
+```
+
+Making a basic scatter plot with data
+
+```{r}
+ggplot(gapminder_2007) + aes(x=gdpPercap, y=lifeExp) + geom_point()
+```
+
+Making points slightly transparent because many of them are overlapping
+
+```{r}
+ggplot(gapminder_2007) + aes(x=gdpPercap, y=lifeExp) + geom_point(alpha=0.5)
+```
+
+Adding more variables
+
+```{r}
+ggplot(gapminder_2007) + aes(x=gdpPercap, y=lifeExp, col=continent, size=pop) + geom_point(alpha=0.5)
+```
+
+

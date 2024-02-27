@@ -1,2 +1,2 @@
 # BIMM143
-Class work from Bioinformatics Lab (W24)
+Class work from Bioinformatics Lab (W24) at UCSD

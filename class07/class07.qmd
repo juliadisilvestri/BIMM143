@@ -1,0 +1,209 @@
+---
+title: "Class 7: Machine Learning 1"
+author: "Julia Di Silvestri (PID: A16950824)"
+format: pdf
+editor: visual
+---
+
+# Clustering Methods
+
+The broad goal here is to find groupings (clusters) in your input drug data.
+
+## Kmeans
+
+First, we will make up some data where we know what the answer should be. 
+
+```{r}
+x <- rnorm(1000)
+hist(x)
+```
+
+rnorm works as follows : rnorm(n (number of points), mean (default = 0), sd (default = 1))
+
+Make a vector of length 60 with 30 point centered at -3 and 30 points centered at +3
+
+```{r}
+tmp <- c(rnorm(30, mean = -3), rnorm(30, mean = 3))
+tmp
+```
+
+I will make a small x and y dataset with 2 groups of points
+
+```{r}
+x <- cbind( x = tmp, y = rev(tmp))
+plot(x)
+```
+
+```{r}
+k <- kmeans(x, centers = 2)
+k
+```
+ 
+
+> Q. From your result object `k` how many points are in each cluster?
+
+```{r}
+k$size
+```
+
+> Q. What "componenet" of your result object details the cluster membership?
+
+```{r}
+k$cluster
+```
+
+> Q. Cluster centers?
+
+
+```{r}
+k$centers
+```
+
+```{r}
+plot(x, col = k$cluster)
+points(k$centers, col = "blue", pch = 15, cex = 2)
+```
+
+We can cluster into 4 groups
+
+```{r}
+# kmeans
+k4 <- kmeans(x, centers = 4)
+# plot results
+plot(x, col = k4$cluster)
+```
+
+A big limitation of kmeans is that it does what you ask even if it doesn't make sense for the data.
+
+## Hierarchical Clustering
+
+The main base R function for HClustering is `hclust()`. Unlike `kmeans()`, you cannot just pass it your data as input. You first need to calculate a distance matrix. 
+
+```{r}
+d <- dist(x)
+hc <- hclust(d)
+hc
+```
+
+Use `plot()` to view results
+
+```{r}
+plot(hc)
+abline(h = 10, col = "red")
+```
+
+To make the "cut" at the line set and get our cluster membership vector, we can use the `cutree()` function.
+
+```{r}
+grps <- cutree(hc, h=10)
+grps
+```
+
+Make a plot of our data colored by hclust results
+
+```{r}
+plot(x, col = grps)
+```
+
+# Principal Component Analysis (PCA) --> LAB HANDOUT
+
+Here we will do a PCA on some food data from the UK.
+
+```{r}
+url <- "https://tinyurl.com/UK-foods"
+#reading csv, but setting the first column to be rownames, not data
+x <- read.csv(url, row.names = 1)
+x
+```
+
+> Q1. Complete the following code to find out how many rows and columns are in x?
+___(x)
+
+```{r}
+dim(x)
+```
+
+> Q2. Which approach to solving the ‘row-names problem’ mentioned above do you prefer and why? Is one approach more robust than another under certain circumstances?
+
+Using the approach `read.csv(row.names = 1)` is best because using the [, -1] method will continue to remove the first row each time it is run (rendered)
+
+
+
+```{r}
+barplot(as.matrix(x), beside=T, col=rainbow(nrow(x)))
+```
+> Q3. Changing what optional argument in the above barplot() function results in the following plot?
+
+```{r}
+barplot(as.matrix(x), beside=F, col=rainbow(nrow(x)))
+# changed `beside = F`
+```
+
+> Q5: Generating all pairwise plots may help somewhat. Can you make sense of the following code and resulting figure? What does it mean if a given point lies on the diagonal for a given plot?
+
+```{r}
+pairs(x, col=rainbow(10), pch=16)
+```
+
+If a point lies on a diagonal, there is not a significant difference between that data point when comparing the two places for the given plot.
+
+> Q6. What is the main differences between N. Ireland and the other countries of the UK in terms of this data-set?
+
+## PCA to the rescue
+
+The main "base" R function for PCA is called `prcomp()`
+
+```{r}
+pca <- prcomp( t(x) )
+summary( pca )
+```
+
+> Q. How much variance is captured in 2 PCs?
+
+96.5%
+
+To make out main "PC score plot" (a.k.a "PC1 vs PC2 plot" or "PC plot" or "ordination plot")
+
+```{r}
+attributes(pca)
+```
+
+We are after the `pca$x` result component to make our main PCA plot.
+
+```{r}
+pca$x
+```
+
+```{r}
+mycols <- c("orange", "red", "blue", "darkgreen")
+plot(pca$x[,1], pca$x[,2], col = mycols, pch = 16, xlab = "PC1 (67.4%)", ylab = "PC2 (29%)")
+text(pca$x[,1], pca$x[,2], colnames(x), col = mycols)
+```
+
+Another important result from PCA is how the original variable (in this case the foods) contribute to the PCs.
+
+What is it that makes N.Ireland so different from the other countries in PC1? This is contained in the `pca$rotation` object -- folks often call this the "loadings" or "contributions" to the PCs.
+
+```{r}
+pca$rotation
+```
+
+Plotting the rotation allows us to see what is making N.Ireland so different from the others.
+
+```{r}
+library(ggplot2)
+
+ld <- as.data.frame(pca$rotation)
+ld_lab <- tibble::rownames_to_column(ld, "Food")
+
+ggplot(ld_lab) +
+  aes(PC1, reorder(Food, PC1), bg=PC1) +
+  geom_col() + 
+  xlab("PC1 Loadings/Contributions") +
+  ylab("Food Group") +
+  scale_fill_gradient2(low="purple", mid="gray", high="darkgreen", guide=NULL) +
+  theme_bw()
+```
+
+
+

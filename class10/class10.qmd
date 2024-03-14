@@ -1,0 +1,172 @@
+---
+title: "Class 10: Structural Bioinformatics Pt 1"
+author: "Julia Di Silvestri (A16950824)"
+format: pdf
+editor: visual
+---
+
+# Introduction to the RCSB Protein Data Bank
+
+First, I will the data set, save it in my current project, and make sure that I can read it.
+
+This may look slightly different from in class because I was not able to make it to class because of illness, so I am trying this on my own
+
+```{r}
+ # Read the CSV file
+  data <- read.csv("pdbdata.csv", row.names = 1)
+  
+  # Remove commas and convert to numeric for each column
+  data[] <- lapply(data, function(x) as.numeric(gsub(",", "", x)))
+  
+ data
+```
+
+> Q1: What percentage of structures in the PDB are solved by X-Ray and Electron Microscopy.
+
+```{r}
+(sum(data$X.ray, data$EM)) / colSums(data, na.rm = T)
+
+#another way to do it
+
+(sum(data$X.ray, data$EM)) / sum(data$Total)
+```
+
+93.27% of all structures in the dataset are solved by X-Ray and Electron Microscopy
+
+> Q2: What proportion of structures in the PDB are protein?
+
+```{r}
+#First figure out how to specifiy the data we want to sum
+ptot <- data[c(1, 4, 5), 7]
+ptot
+
+#The sum it and divide it by the total data
+sum(ptot)
+sum(ptot) / sum(data$Total)
+```
+
+97.86% of the structures are proteins
+
+> Q3: Type HIV in the PDB website search box on the home page and determine how many HIV-1 protease structures are in the current PDB?
+
+The search returns 4,410 results
+
+#PDB Format
+
+> Q4: Water molecules normally have 3 atoms. Why do we see just one atom per water molecule in this structure?
+
+Hydrogen atoms aren't shown in the ball and stick format, so only the oxygen is displayed
+
+> Q5: There is a critical “conserved” water molecule in the binding site. Can you identify this water molecule? What residue number does this water molecule have
+
+The residue number of this water molecule is HOH 332
+
+> Q6. Generate and save a figure clearly showing the two distinct chains of HIV-protease along with the ligand. You might also consider showing the catalytic residues ASP 25 in each chain and the critical water (we recommend “Ball & Stick” for these side-chains). Add this figure to your Quarto document.
+
+![](1HSG-3.png)
+
+#Introduction to Bio3D
+
+```{r}
+#Loading in the package
+library(bio3d)
+
+#Reading file
+pdb <- read.pdb("1hsg")
+pdb
+```
+
+> Q7: How many amino acid residues are there in this pdb object?
+
+198 (read from file)
+
+> Q8: Name one of the two non-protein residues?
+
+HOH (read from file)
+
+> Q9: How many protein chains are in this structure?
+
+2 (read from file)
+
+
+To view the attributes of this object:
+```{r}
+attributes(pdb)
+```
+
+#Predicting Functional Motions of a Single Structure
+
+We will read a new PDB structure and perfrom Normal Mode analysis
+
+```{r}
+adk <- read.pdb("6s36")
+adk
+```
+
+
+To perform a flexibility / conformational change prediction, use `nma()`
+
+```{r}
+m <- nma(adk)
+plot(m)
+```
+We can generate a "movie" of these predicted motions using the `mktrj()` function and load the results into Mol*
+
+#Comparative structure analysis of Adenylate Kinase
+
+First, all of the packages need to be installed
+
+```{r}|
+# Install packages in the R console NOT your Rmd/Quarto file
+
+install.packages("bio3d")
+install.packages("devtools")
+install.packages("BiocManager")
+
+BiocManager::install("msa")
+devtools::install_bitbucket("Grantlab/bio3d-view")
+```
+> Q10. Which of the packages above is found only on BioConductor and not CRAN?
+
+msa
+
+> Q11. Which of the above packages is not found on BioConductor or CRAN?
+
+bio3d-view
+
+> Q12. True or False? Functions from the devtools package can be used to install packages from GitHub and BitBucket?
+
+True
+
+To perform a BLAST search of our structure, we first need to get the sequence:
+
+```{r}
+aa <- get.seq("1ake_A")
+aa
+```
+
+> Q13. How many amino acids are in this sequence, i.e. how long is this sequence?
+
+214
+
+Now we can run the BLAST:
+
+```{r}|
+# Blast or hmmer search 
+b <- blast.pdb(aa)
+```
+^ could not get the request to go through -- could not do much with this
+
+
+
+
+
+
+
+
+
+
+
+
+
+

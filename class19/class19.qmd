@@ -1,0 +1,61 @@
+---
+title: "class 19"
+author: "julia di silvestri"
+format: html
+editor: visual
+---
+
+
+```{r}
+library(bio3d)
+
+s <- read.fasta("A16950824_mutant_seq.fa")
+
+s
+```
+
+Score residue conservation
+```{r}
+mut <- conserv(s) < 1
+sum(mut)
+```
+
+I have 4 mutations
+
+What positions are they in?
+```{r}
+pos <- which(mut)
+```
+
+What are the mutations?
+```{r}
+mutation <- function(x) {
+  s$ali[,x]
+}
+
+mutation(pos)
+```
+
+```{r}
+paste( s$ali[1,pos], pos, s$ali[2,pos], sep = "")
+```
+
+
+```{r}
+s$ali["mutant_tumor",]
+```
+
+```{r}
+healthy <- s$ali[[1]]
+
+cat(sequence_to_print, "\n")
+```
+
+
+
+
+
+
+
+
+

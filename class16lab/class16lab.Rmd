@@ -1,0 +1,40 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+# Class 16 Lab
+
+# Using RStudio to read data output
+
+First, I need to read in my tsv file that I obtained earlier in the class:
+
+```{r}
+data <- read.table("mm-second.x.zebrafish.tsv", col.names = c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore"))
+
+head(data)
+```
+
+Make a histogram of the bitscore values:
+
+```{r}
+hist(data$bitscore, breaks = 30, main = "Bitscore Values from Zebrafish",xlab = "Bitscore")
+```
+
+Now we will plot percent identity against bitscore to see the relationship between them using ggplot:
+
+```{r}
+library(ggplot2)
+ggplot(data, aes(pident, bitscore)) + geom_point(alpha=0.1) 
+```
+
+```{r}
+ggplot(data, aes((data$pident * (data$qend - data$qstart)), bitscore)) + geom_point(alpha=0.1) + geom_smooth()
+
+
+```
+
+
+
+
+
